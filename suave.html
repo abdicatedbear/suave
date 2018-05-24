@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Sugarcube Save Editor</title>
+
+</head>
+<script src="https://cdn.rawgit.com/pieroxy/lz-string/master/libs/lz-string.min.js"></script> <!-- https://github.com/pieroxy/lz-string -->
+<script type="text/javascript">
+ 
+function saveTextAsFile()
+{
+    var textToSave = LZString.compressToBase64(document.getElementById("textbox").value);
+    var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
+    var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+    var fileNameToSaveAs = document.getElementById("output_file").value;
+ 
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+    downloadLink.href = textToSaveAsURL;
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+ 
+    downloadLink.click();
+}
+ 
+function destroyClickedElement(event)
+{
+    document.body.removeChild(event.target);
+}
+ 
+function loadFileAsText()
+{
+    var fileToLoad = document.getElementById("input_file").files[0];
+	var displayArea = document.getElementById("textbox");
+ 
+    var fileReader = new FileReader();
+    fileReader.onload = function(fileLoadedEvent) 
+    {
+        var textFromFileLoaded = fileLoadedEvent.target.result;
+		displayArea.value = LZString.decompressFromBase64(textFromFileLoaded);
+    };
+    fileReader.readAsText(fileToLoad, "UTF-8");
+	document.getElementById("output_file").value = "suave."+fileToLoad.name
+}
+ 
+</script>
+<body>
+<h1>SugarCube Save Editor (Suave)</h1>
+<p>
+To use, click "Save As File" in your game, then select that file here:
+
+<center>
+<table padding-bottom="10px">
+   <tr>
+        <td>Select a File to Load:</td>
+        <td><input type="file" id="input_file"></td>
+        <td><button onclick="loadFileAsText()">Load File</button><td>
+    </tr>
+    <tr><td>Edit your save here:</td></tr>
+    <tr>
+        <td colspan="3">
+            <textarea id="textbox" cols="100" rows="45"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>Save As:</td>
+        <td><input id="output_file" value="suave.save"></input></td>
+        <td><button onclick="saveTextAsFile()">Save Text to File (encrypted)</button></td>
+    </tr>
+</table>
+</center>
+ 
+</body>
+</html>
